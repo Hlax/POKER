@@ -1,0 +1,14 @@
+{
+	"Targets": [
+		{
+			"Name": "POKER",
+			"Path": "..\\Source\\POKER.Target.cs",
+			"Type": "Game"
+		},
+		{
+			"Name": "POKEREditor",
+			"Path": "..\\Source\\POKEREditor.Target.cs",
+			"Type": "Editor"
+		}
+	]
+}

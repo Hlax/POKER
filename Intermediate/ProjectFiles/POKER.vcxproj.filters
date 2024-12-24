@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="..\..\POKER.uproject" />
+    <Filter Include="Source">
+      <UniqueIdentifier>{F31BBDD1-B3E8-3BCC-9652-680E16935819}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\POKER.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\..\Source\POKEREditor.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\..\.vsconfig" />
+    <Filter Include="Config">
+      <UniqueIdentifier>{FA535FFB-25E1-3D20-B416-52F9BE21E06E}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Config\DefaultEditor.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultEngine.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultGame.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultInput.ini">
+      <Filter>Config</Filter>
+    </None>
+    <Filter Include="Source\POKER">
+      <UniqueIdentifier>{D739DD12-7C67-3254-BBB8-63E3AAB9D910}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\POKER\POKER.Build.cs">
+      <Filter>Source\POKER</Filter>
+    </None>
+    <ClCompile Include="..\..\Source\POKER\POKER.cpp">
+      <Filter>Source\POKER</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\POKER.h">
+      <Filter>Source\POKER</Filter>
+    </ClCompile>
+    <Filter Include="Source\POKER\Private">
+      <UniqueIdentifier>{63D0ECD3-E217-318B-A1E6-5927066677C4}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="..\..\Source\POKER\Private\AIPlayer.cpp">
+      <Filter>Source\POKER\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\Private\Card.cpp">
+      <Filter>Source\POKER\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\Private\Deck.cpp">
+      <Filter>Source\POKER\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\Private\MyPlayer.cpp">
+      <Filter>Source\POKER\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\Private\PokerGameMode.cpp">
+      <Filter>Source\POKER\Private</Filter>
+    </ClCompile>
+    <Filter Include="Source\POKER\Public">
+      <UniqueIdentifier>{679B0BB3-93FB-3455-8CC8-B33E88531AC8}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="..\..\Source\POKER\Public\AIPlayer.h">
+      <Filter>Source\POKER\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\Public\Card.h">
+      <Filter>Source\POKER\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\Public\Deck.h">
+      <Filter>Source\POKER\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\Public\MyPlayer.h">
+      <Filter>Source\POKER\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\Public\PokerGameMode.h">
+      <Filter>Source\POKER\Public</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
