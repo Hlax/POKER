@@ -17,13 +17,13 @@ void EmptyLinkFunctionForGeneratedCodePOKER_init() {}
 				nullptr,
 				0,
 				PKG_CompiledIn | 0x00000000,
-				0x8C0CF571,
-				0xAD6DCF06,
+				0x2FCD1CD4,
+				0x54C6C5AC,
 				METADATA_PARAMS(0, nullptr)
 			};
 			UECodeGen_Private::ConstructUPackage(Z_Registration_Info_UPackage__Script_POKER.OuterSingleton, PackageParams);
 		}
 		return Z_Registration_Info_UPackage__Script_POKER.OuterSingleton;
 	}
-	static FRegisterCompiledInInfo Z_CompiledInDeferPackage_UPackage__Script_POKER(Z_Construct_UPackage__Script_POKER, TEXT("/Script/POKER"), Z_Registration_Info_UPackage__Script_POKER, CONSTRUCT_RELOAD_VERSION_INFO(FPackageReloadVersionInfo, 0x8C0CF571, 0xAD6DCF06));
+	static FRegisterCompiledInInfo Z_CompiledInDeferPackage_UPackage__Script_POKER(Z_Construct_UPackage__Script_POKER, TEXT("/Script/POKER"), Z_Registration_Info_UPackage__Script_POKER, CONSTRUCT_RELOAD_VERSION_INFO(FPackageReloadVersionInfo, 0x2FCD1CD4, 0x54C6C5AC));
 PRAGMA_ENABLE_DEPRECATION_WARNINGS

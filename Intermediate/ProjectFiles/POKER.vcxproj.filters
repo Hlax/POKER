@@ -11,6 +11,8 @@
     <None Include="..\..\Source\POKEREditor.Target.cs">
       <Filter>Source</Filter>
     </None>
+    <None Include="..\..\.gitattributes" />
+    <None Include="..\..\.gitignore" />
     <None Include="..\..\.vsconfig" />
     <Filter Include="Config">
       <UniqueIdentifier>{FA535FFB-25E1-3D20-B416-52F9BE21E06E}</UniqueIdentifier>
@@ -57,6 +59,9 @@
     <ClCompile Include="..\..\Source\POKER\Private\PokerGameMode.cpp">
       <Filter>Source\POKER\Private</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\Private\PokerGameState.cpp">
+      <Filter>Source\POKER\Private</Filter>
+    </ClCompile>
     <Filter Include="Source\POKER\Public">
       <UniqueIdentifier>{679B0BB3-93FB-3455-8CC8-B33E88531AC8}</UniqueIdentifier>
     </Filter>
@@ -69,10 +74,19 @@
     <ClCompile Include="..\..\Source\POKER\Public\Deck.h">
       <Filter>Source\POKER\Public</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\Public\IPokerPlayerInterface.h">
+      <Filter>Source\POKER\Public</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\POKER\Public\MyPlayer.h">
       <Filter>Source\POKER\Public</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\POKER\Public\PokerGameMode.h">
+      <Filter>Source\POKER\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\Public\PokerGameState.h">
+      <Filter>Source\POKER\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\Public\PokerType.h">
       <Filter>Source\POKER\Public</Filter>
     </ClCompile>
   </ItemGroup>

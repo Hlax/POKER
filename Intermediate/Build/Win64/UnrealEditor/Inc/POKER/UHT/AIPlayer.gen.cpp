@@ -10,72 +10,81 @@ PRAGMA_DISABLE_DEPRECATION_WARNINGS
 void EmptyLinkFunctionForGeneratedCodeAIPlayer() {}
 
 // Begin Cross Module References
-POKER_API UScriptStruct* Z_Construct_UScriptStruct_FAIPlayer();
-POKER_API UScriptStruct* Z_Construct_UScriptStruct_FMyPlayer();
+POKER_API UClass* Z_Construct_UClass_AAIPlayer();
+POKER_API UClass* Z_Construct_UClass_AAIPlayer_NoRegister();
+POKER_API UClass* Z_Construct_UClass_AMyPlayer();
 UPackage* Z_Construct_UPackage__Script_POKER();
 // End Cross Module References
 
-// Begin ScriptStruct FAIPlayer
-static_assert(std::is_polymorphic<FAIPlayer>() == std::is_polymorphic<FMyPlayer>(), "USTRUCT FAIPlayer cannot be polymorphic unless super FMyPlayer is polymorphic");
-static FStructRegistrationInfo Z_Registration_Info_UScriptStruct_AIPlayer;
-class UScriptStruct* FAIPlayer::StaticStruct()
+// Begin Class AAIPlayer
+void AAIPlayer::StaticRegisterNativesAAIPlayer()
 {
-	if (!Z_Registration_Info_UScriptStruct_AIPlayer.OuterSingleton)
-	{
-		Z_Registration_Info_UScriptStruct_AIPlayer.OuterSingleton = GetStaticStruct(Z_Construct_UScriptStruct_FAIPlayer, (UObject*)Z_Construct_UPackage__Script_POKER(), TEXT("AIPlayer"));
-	}
-	return Z_Registration_Info_UScriptStruct_AIPlayer.OuterSingleton;
 }
-template<> POKER_API UScriptStruct* StaticStruct<FAIPlayer>()
+IMPLEMENT_CLASS_NO_AUTO_REGISTRATION(AAIPlayer);
+UClass* Z_Construct_UClass_AAIPlayer_NoRegister()
 {
-	return FAIPlayer::StaticStruct();
+	return AAIPlayer::StaticClass();
 }
-struct Z_Construct_UScriptStruct_FAIPlayer_Statics
+struct Z_Construct_UClass_AAIPlayer_Statics
 {
 #if WITH_METADATA
-	static constexpr UECodeGen_Private::FMetaDataPairParam Struct_MetaDataParams[] = {
+	static constexpr UECodeGen_Private::FMetaDataPairParam Class_MetaDataParams[] = {
+		{ "IncludePath", "AIPlayer.h" },
 		{ "ModuleRelativePath", "Public/AIPlayer.h" },
 	};
 #endif // WITH_METADATA
-	static void* NewStructOps()
-	{
-		return (UScriptStruct::ICppStructOps*)new UScriptStruct::TCppStructOps<FAIPlayer>();
-	}
-	static const UECodeGen_Private::FStructParams StructParams;
+	static UObject* (*const DependentSingletons[])();
+	static constexpr FCppClassTypeInfoStatic StaticCppClassTypeInfo = {
+		TCppClassTypeTraits<AAIPlayer>::IsAbstract,
+	};
+	static const UECodeGen_Private::FClassParams ClassParams;
 };
-const UECodeGen_Private::FStructParams Z_Construct_UScriptStruct_FAIPlayer_Statics::StructParams = {
+UObject* (*const Z_Construct_UClass_AAIPlayer_Statics::DependentSingletons[])() = {
+	(UObject* (*)())Z_Construct_UClass_AMyPlayer,
 	(UObject* (*)())Z_Construct_UPackage__Script_POKER,
-	Z_Construct_UScriptStruct_FMyPlayer,
-	&NewStructOps,
-	"AIPlayer",
-	nullptr,
-	0,
-	sizeof(FAIPlayer),
-	alignof(FAIPlayer),
-	RF_Public|RF_Transient|RF_MarkAsNative,
-	EStructFlags(0x00000201),
-	METADATA_PARAMS(UE_ARRAY_COUNT(Z_Construct_UScriptStruct_FAIPlayer_Statics::Struct_MetaDataParams), Z_Construct_UScriptStruct_FAIPlayer_Statics::Struct_MetaDataParams)
 };
-UScriptStruct* Z_Construct_UScriptStruct_FAIPlayer()
+static_assert(UE_ARRAY_COUNT(Z_Construct_UClass_AAIPlayer_Statics::DependentSingletons) < 16);
+const UECodeGen_Private::FClassParams Z_Construct_UClass_AAIPlayer_Statics::ClassParams = {
+	&AAIPlayer::StaticClass,
+	"Engine",
+	&StaticCppClassTypeInfo,
+	DependentSingletons,
+	nullptr,
+	nullptr,
+	nullptr,
+	UE_ARRAY_COUNT(DependentSingletons),
+	0,
+	0,
+	0,
+	0x009000A4u,
+	METADATA_PARAMS(UE_ARRAY_COUNT(Z_Construct_UClass_AAIPlayer_Statics::Class_MetaDataParams), Z_Construct_UClass_AAIPlayer_Statics::Class_MetaDataParams)
+};
+UClass* Z_Construct_UClass_AAIPlayer()
 {
-	if (!Z_Registration_Info_UScriptStruct_AIPlayer.InnerSingleton)
+	if (!Z_Registration_Info_UClass_AAIPlayer.OuterSingleton)
 	{
-		UECodeGen_Private::ConstructUScriptStruct(Z_Registration_Info_UScriptStruct_AIPlayer.InnerSingleton, Z_Construct_UScriptStruct_FAIPlayer_Statics::StructParams);
+		UECodeGen_Private::ConstructUClass(Z_Registration_Info_UClass_AAIPlayer.OuterSingleton, Z_Construct_UClass_AAIPlayer_Statics::ClassParams);
 	}
-	return Z_Registration_Info_UScriptStruct_AIPlayer.InnerSingleton;
+	return Z_Registration_Info_UClass_AAIPlayer.OuterSingleton;
 }
-// End ScriptStruct FAIPlayer
+template<> POKER_API UClass* StaticClass<AAIPlayer>()
+{
+	return AAIPlayer::StaticClass();
+}
+DEFINE_VTABLE_PTR_HELPER_CTOR(AAIPlayer);
+AAIPlayer::~AAIPlayer() {}
+// End Class AAIPlayer
 
 // Begin Registration
 struct Z_CompiledInDeferFile_FID_Users_guestt_OneDrive_Documents_Unreal_Projects_POKER_Source_POKER_Public_AIPlayer_h_Statics
 {
-	static constexpr FStructRegisterCompiledInInfo ScriptStructInfo[] = {
-		{ FAIPlayer::StaticStruct, Z_Construct_UScriptStruct_FAIPlayer_Statics::NewStructOps, TEXT("AIPlayer"), &Z_Registration_Info_UScriptStruct_AIPlayer, CONSTRUCT_RELOAD_VERSION_INFO(FStructReloadVersionInfo, sizeof(FAIPlayer), 1928481381U) },
+	static constexpr FClassRegisterCompiledInInfo ClassInfo[] = {
+		{ Z_Construct_UClass_AAIPlayer, AAIPlayer::StaticClass, TEXT("AAIPlayer"), &Z_Registration_Info_UClass_AAIPlayer, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(AAIPlayer), 878951211U) },
 	};
 };
-static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_Users_guestt_OneDrive_Documents_Unreal_Projects_POKER_Source_POKER_Public_AIPlayer_h_3140486744(TEXT("/Script/POKER"),
+static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_Users_guestt_OneDrive_Documents_Unreal_Projects_POKER_Source_POKER_Public_AIPlayer_h_598700963(TEXT("/Script/POKER"),
+	Z_CompiledInDeferFile_FID_Users_guestt_OneDrive_Documents_Unreal_Projects_POKER_Source_POKER_Public_AIPlayer_h_Statics::ClassInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_Users_guestt_OneDrive_Documents_Unreal_Projects_POKER_Source_POKER_Public_AIPlayer_h_Statics::ClassInfo),
 	nullptr, 0,
-	Z_CompiledInDeferFile_FID_Users_guestt_OneDrive_Documents_Unreal_Projects_POKER_Source_POKER_Public_AIPlayer_h_Statics::ScriptStructInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_Users_guestt_OneDrive_Documents_Unreal_Projects_POKER_Source_POKER_Public_AIPlayer_h_Statics::ScriptStructInfo),
 	nullptr, 0);
 // End Registration
 PRAGMA_ENABLE_DEPRECATION_WARNINGS

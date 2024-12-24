@@ -1,68 +1,134 @@
 // MyPlayer.cpp
 #include "MyPlayer.h"
 
-FMyPlayer::FMyPlayer()
-    : Name(TEXT("Player"))
-    , ChipCount(1000)
-    , bIsInHand(false)
-    , CurrentBet(0)
+AMyPlayer::AMyPlayer()
 {
+    PrimaryActorTick.bCanEverTick = false;
+
+    PlayerName = TEXT("Player");
+    ChipCount = 1000;
+    bIsInHand = false;
+    CurrentBet = 0;
+    SeatIndex = -1;
+
     HoleCards.Reserve(MAX_HOLE_CARDS);
 }
 
-bool FMyPlayer::ReceiveCard(const FCard& Card)
+void AMyPlayer::BeginPlay()
 {
-    if (HoleCards.Num() >= MAX_HOLE_CARDS)
-    {
-        return false;
-    }
-
-    HoleCards.Add(Card);
-    return true;
+    Super::BeginPlay();
+    UE_LOG(LogTemp, Log, TEXT("Player %s spawned with %d chips"), *PlayerName, ChipCount);
 }
 
-void FMyPlayer::ClearHand()
+EPlayerAction AMyPlayer::RequestAction(int32 MinimumBet, const TArray<FCard>& CommunityCards)
 {
-    HoleCards.Empty();
-    bIsInHand = false;
+    // Base player implementation - will be overridden by UI input in a derived class
+    // For testing, we'll just fold
+    EPlayerAction Action = EPlayerAction::Fold;
+    DebugPrintAction(Action, MinimumBet);
+    return Action;
 }
 
-bool FMyPlayer::PlaceBet(int32 Amount)
+bool AMyPlayer::PlaceBet(int32 Amount)
 {
-    if (Amount > ChipCount || !bIsInHand)
+    if (Amount <= 0 || Amount > ChipCount || !bIsInHand)
     {
+        UE_LOG(LogTemp, Warning, TEXT("Invalid bet: Player %s attempted to bet %d chips (Has: %d, InHand: %s)"),
+            *PlayerName, Amount, ChipCount, bIsInHand ? TEXT("true") : TEXT("false"));
         return false;
     }
 
     ChipCount -= Amount;
     CurrentBet += Amount;
+
+    UE_LOG(LogTemp, Log, TEXT("Player %s bet %d chips (Current bet: %d, Remaining: %d)"),
+        *PlayerName, Amount, CurrentBet, ChipCount);
     return true;
 }
 
-void FMyPlayer::WinPot(int32 Amount)
+void AMyPlayer::WinPot(int32 Amount)
 {
+    if (Amount <= 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Invalid pot win amount: %d for player %s"), Amount, *PlayerName);
+        return;
+    }
+
     ChipCount += Amount;
+    UE_LOG(LogTemp, Log, TEXT("Player %s won pot of %d chips (New total: %d)"),
+        *PlayerName, Amount, ChipCount);
 }
 
-void FMyPlayer::PrepareForNewHand()
+bool AMyPlayer::ReceiveCard(const FCard& Card)
+{
+    if (HoleCards.Num() >= MAX_HOLE_CARDS)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Player %s cannot receive more cards (max: %d)"),
+            *PlayerName, MAX_HOLE_CARDS);
+        return false;
+    }
+
+    HoleCards.Add(Card);
+    UE_LOG(LogTemp, Log, TEXT("Player %s received card: %s"), *PlayerName, *Card.ToString());
+    return true;
+}
+
+void AMyPlayer::ClearHand()
+{
+    HoleCards.Empty();
+    bIsInHand = false;
+    CurrentBet = 0;
+    UE_LOG(LogTemp, Log, TEXT("Player %s's hand cleared"), *PlayerName);
+}
+
+void AMyPlayer::PrepareForNewHand()
 {
     ClearHand();
     bIsInHand = true;
+    UE_LOG(LogTemp, Log, TEXT("Player %s prepared for new hand"), *PlayerName);
+}
+
+void AMyPlayer::ResetBetForNewRound()
+{
     CurrentBet = 0;
+    UE_LOG(LogTemp, Log, TEXT("Player %s's bet reset for new round"), *PlayerName);
 }
 
-EPlayerAction FMyPlayer::RequestAction(int32 MinimumBet, const TArray<FCard>& CommunityCards)
+bool AMyPlayer::CanMakeAction(EPlayerAction Action, int32 MinimumBet) const
 {
-    // Base player always folds
-    return EPlayerAction::Fold;
+    if (!bIsInHand)
+    {
+        return false;
+    }
+
+    switch (Action)
+    {
+    case EPlayerAction::Fold:
+        return true;
+
+    case EPlayerAction::Check:
+        return MinimumBet <= CurrentBet;
+
+    case EPlayerAction::Call:
+        return (MinimumBet - CurrentBet) <= ChipCount;
+
+    case EPlayerAction::Raise:
+        // Assuming minimum raise is 2x the current minimum bet
+        return (MinimumBet * 2 - CurrentBet) <= ChipCount;
+
+    default:
+        return false;
+    }
 }
 
-void FMyPlayer::DebugPrintHand() const
+void AMyPlayer::DebugPrintHand() const
 {
-    UE_LOG(LogTemp, Log, TEXT("\nPlayer: %s"), *Name);
+    UE_LOG(LogTemp, Log, TEXT("\n=== Player Status ==="));
+    UE_LOG(LogTemp, Log, TEXT("Name: %s"), *PlayerName);
     UE_LOG(LogTemp, Log, TEXT("Chips: %d"), ChipCount);
     UE_LOG(LogTemp, Log, TEXT("Current Bet: %d"), CurrentBet);
     UE_LOG(LogTemp, Log, TEXT("In Hand: %s"), bIsInHand ? TEXT("Yes") : TEXT("No"));
+    UE_LOG(LogTemp, Log, TEXT("Seat Index: %d"), SeatIndex);
 
     if (HoleCards.Num() > 0)
     {
@@ -76,4 +142,35 @@ void FMyPlayer::DebugPrintHand() const
     {
         UE_LOG(LogTemp, Log, TEXT("No cards in hand"));
     }
+    UE_LOG(LogTemp, Log, TEXT("================\n"));
+}
+
+void AMyPlayer::DebugPrintAction(EPlayerAction Action, int32 MinimumBet) const
+{
+    FString ActionStr;
+    switch (Action)
+    {
+    case EPlayerAction::Check:
+        ActionStr = TEXT("Check");
+        break;
+    case EPlayerAction::Call:
+        ActionStr = TEXT("Call");
+        break;
+    case EPlayerAction::Raise:
+        ActionStr = TEXT("Raise");
+        break;
+    case EPlayerAction::Fold:
+        ActionStr = TEXT("Fold");
+        break;
+    default:
+        ActionStr = TEXT("Unknown");
+        break;
+    }
+
+    UE_LOG(LogTemp, Log, TEXT("Player %s action: %s (Minimum bet: %d)"),
+        *PlayerName, *ActionStr, MinimumBet);
+    UE_LOG(LogTemp, Log, TEXT("  Current chips: %d"), ChipCount);
+    UE_LOG(LogTemp, Log, TEXT("  Current bet: %d"), CurrentBet);
+    UE_LOG(LogTemp, Log, TEXT("  Can make action: %s"),
+        CanMakeAction(Action, MinimumBet) ? TEXT("Yes") : TEXT("No"));
 }

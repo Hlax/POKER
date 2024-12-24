@@ -1,5 +1,8 @@
 C:\Users\guestt\OneDrive\Documents\Unreal Projects\POKER\Source\POKER\Public\AIPlayer.h
-C:\Users\guestt\OneDrive\Documents\Unreal Projects\POKER\Source\POKER\Public\PokerGameMode.h
-C:\Users\guestt\OneDrive\Documents\Unreal Projects\POKER\Source\POKER\Public\MyPlayer.h
-C:\Users\guestt\OneDrive\Documents\Unreal Projects\POKER\Source\POKER\Public\Card.h
 C:\Users\guestt\OneDrive\Documents\Unreal Projects\POKER\Source\POKER\Public\Deck.h
+C:\Users\guestt\OneDrive\Documents\Unreal Projects\POKER\Source\POKER\Public\MyPlayer.h
+C:\Users\guestt\OneDrive\Documents\Unreal Projects\POKER\Source\POKER\Public\PokerType.h
+C:\Users\guestt\OneDrive\Documents\Unreal Projects\POKER\Source\POKER\Public\PokerGameState.h
+C:\Users\guestt\OneDrive\Documents\Unreal Projects\POKER\Source\POKER\Public\Card.h
+C:\Users\guestt\OneDrive\Documents\Unreal Projects\POKER\Source\POKER\Public\IPokerPlayerInterface.h
+C:\Users\guestt\OneDrive\Documents\Unreal Projects\POKER\Source\POKER\Public\PokerGameMode.h

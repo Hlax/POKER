@@ -1,5 +1,4 @@
-// PokerGameMode.h
-#pragma once
+#pragma once    // Make sure this is here!
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
@@ -7,6 +6,7 @@
 #include "Deck.h"
 #include "MyPlayer.h"
 #include "AIPlayer.h"
+#include "PokerType.h"
 #include "PokerGameMode.generated.h"
 
 UCLASS()
@@ -23,9 +23,13 @@ protected:
 private:
     void TestDeck();
     void TestPlayerFunctions();
-    void TestAIFunctions(); // Renamed from TestAIPlayer
+    void TestAIFunctions();
 
     FDeck TestDeckInstance;
-    FMyPlayer TestPlayer;
-    FAIPlayer TestAIPlayer;
+
+    UPROPERTY()
+    AMyPlayer* TestPlayer;
+
+    UPROPERTY()
+    AAIPlayer* TestAIPlayer;
 };

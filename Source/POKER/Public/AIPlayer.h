@@ -5,18 +5,17 @@
 #include "MyPlayer.h"
 #include "AIPlayer.generated.h"
 
-USTRUCT()
-struct POKER_API FAIPlayer : public FMyPlayer
+UCLASS()
+class POKER_API AAIPlayer : public AMyPlayer
 {
     GENERATED_BODY()
 
 public:
-    FAIPlayer();
+    AAIPlayer();
 
-    virtual EPlayerAction RequestAction(
-        int32 MinimumBet,
-        const TArray<FCard>& CommunityCards
-    ) override;
+    // Override the RequestAction from parent to implement AI logic
+    virtual EPlayerAction RequestAction(int32 MinimumBet, const TArray<FCard>& CommunityCards) override;
+    virtual bool IsAIPlayer() const override { return true; }
 
 private:
     float EvaluateHandStrength(const TArray<FCard>& CommunityCards) const;
