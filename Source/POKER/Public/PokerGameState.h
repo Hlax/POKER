@@ -5,23 +5,10 @@
 #include "GameFramework/GameStateBase.h"
 #include "Card.h"
 #include "Deck.h"
-#include "MyPlayer.h"
+#include "RoundManager.h"
+#include "HandEvaluator.h"
 #include "PokerType.h"
-#include "IPokerPlayerInterface.h"
 #include "PokerGameState.generated.h"
-
-UENUM(BlueprintType)
-enum class EPokerGamePhase : uint8
-{
-    None            UMETA(DisplayName = "None"),
-    Initializing    UMETA(DisplayName = "Initializing"),
-    PreFlop         UMETA(DisplayName = "Pre-Flop"),
-    Flop            UMETA(DisplayName = "Flop"),
-    Turn            UMETA(DisplayName = "Turn"),
-    River           UMETA(DisplayName = "River"),
-    Showdown        UMETA(DisplayName = "Showdown"),
-    HandComplete    UMETA(DisplayName = "Hand Complete")
-};
 
 UCLASS()
 class POKER_API APokerGameState : public AGameStateBase
@@ -31,30 +18,28 @@ class POKER_API APokerGameState : public AGameStateBase
 public:
     APokerGameState();
 
-    void InitializeGame(int32 NumPlayers, int32 StartingChips, int32 SmallBlind);
-    void StartNewHand();
-    void AdvanceGamePhase();
-    void ProcessPlayerAction(int32 PlayerIndex, EPlayerAction Action);
-
-    // Getters
-    EPokerGamePhase GetCurrentPhase() const { return CurrentPhase; }
-    int32 GetPotSize() const { return PotSize; }
-    int32 GetCurrentBet() const { return CurrentBet; }
-    int32 GetSmallBlind() const { return SmallBlindAmount; }
-    int32 GetBigBlind() const { return SmallBlindAmount * 2; }
-    const TArray<FCard>& GetCommunityCards() const { return CommunityCards; }
-
-protected:
     virtual void BeginPlay() override;
+    void StartNewHand();
+    void ProcessPlayerAction(int32 PlayerIndex, EPlayerAction Action);
+    void AdvanceToNextPhase();
+    void EndCurrentHand();
+
+    void AddPlayer(TScriptInterface<IPokerPlayerInterface> Player);
+    void RemovePlayer(TScriptInterface<IPokerPlayerInterface> Player);
+
+    // State queries
+    EPokerGamePhase GetCurrentPhase() const { return CurrentPhase; }
+    const TArray<FCard>& GetCommunityCards() const { return CommunityCards; }
+    bool IsHandInProgress() const { return bHandInProgress; }
+    URoundManager* GetRoundManager() const { return RoundManager; }
+    const TArray<TScriptInterface<IPokerPlayerInterface>>& GetPlayers() const { return Players; }
 
 private:
-    void DealHoleCards();
-    void DealCommunityCards();
-    void CollectBlinds();
-    void ProcessBettingRound();
-    void DetermineWinner();
-    bool IsRoundComplete() const;
-    void RotateDealer();
+    UPROPERTY()
+    URoundManager* RoundManager;
+
+    UPROPERTY()
+    UHandEvaluator* HandEvaluator;
 
     UPROPERTY()
     EPokerGamePhase CurrentPhase;
@@ -66,28 +51,20 @@ private:
     TArray<FCard> CommunityCards;
 
     UPROPERTY()
-    int32 PotSize;
-
-    UPROPERTY()
-    int32 CurrentBet;
-
-    UPROPERTY()
-    int32 SmallBlindAmount;
+    TArray<TScriptInterface<IPokerPlayerInterface>> Players;
 
     UPROPERTY()
     int32 DealerPosition;
 
     UPROPERTY()
-    int32 CurrentPlayerTurn;
-
-    static const int32 MAX_PLAYERS = 9;
-
-    UPROPERTY()
-    TArray<TScriptInterface<IPokerPlayerInterface>> Players;  // Changed back to IPokerPlayerInterface
-
-    UPROPERTY()
-    int32 LastRaisePosition;
-
-    UPROPERTY()
     bool bHandInProgress;
+
+    void DealHoleCards();
+    void DealCommunityCards(int32 NumCards);
+    void ProcessShowdown();
+    void EndHand();
+    void RotateDealer();
+    void LogGameState() const;
+    void LogCommunityCards() const;
+    void LogHandResults() const;
 };

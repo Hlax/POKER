@@ -1,49 +1,34 @@
-// AIPlayer.cpp
 #include "AIPlayer.h"
 
 AAIPlayer::AAIPlayer()
 {
-    // Initialize in constructor instead of direct assignment
     SetPlayerName(TEXT("AI Player"));
 }
 
 EPlayerAction AAIPlayer::RequestAction(int32 MinimumBet, const TArray<FCard>& CommunityCards)
 {
-    // Simple AI logic
-    float HandStrength = EvaluateHandStrength(CommunityCards);
-    bool Bluffing = ShouldBluff();
+    // Super simple AI logic for testing:
+    // - If no minimum bet, check
+    // - If has minimum bet, just call
+    // - If can't afford the call, fold
 
-    // Log AI thinking
     UE_LOG(LogTemp, Log, TEXT("AI %s evaluating action:"), *GetPlayerName());
-    UE_LOG(LogTemp, Log, TEXT("  Hand Strength: %.2f"), HandStrength);
-    UE_LOG(LogTemp, Log, TEXT("  Bluffing: %s"), Bluffing ? TEXT("Yes") : TEXT("No"));
     UE_LOG(LogTemp, Log, TEXT("  Minimum Bet: %d"), MinimumBet);
+    UE_LOG(LogTemp, Log, TEXT("  Current Chips: %d"), GetChipCount());
 
-    if (Bluffing)
+    if (MinimumBet <= 0)
     {
-        return EPlayerAction::Raise;
+        UE_LOG(LogTemp, Log, TEXT("  Action: Check (no minimum bet)"));
+        return EPlayerAction::Check;
     }
-
-    if (HandStrength < 0.3f)
+    else if (MinimumBet <= GetChipCount())
     {
-        return EPlayerAction::Fold;
-    }
-    else if (HandStrength < 0.7f || MinimumBet > GetChipCount() / 4)
-    {
+        UE_LOG(LogTemp, Log, TEXT("  Action: Call %d"), MinimumBet);
         return EPlayerAction::Call;
     }
     else
     {
-        return EPlayerAction::Raise;
+        UE_LOG(LogTemp, Log, TEXT("  Action: Fold (can't afford call)"));
+        return EPlayerAction::Fold;
     }
-}
-
-float AAIPlayer::EvaluateHandStrength(const TArray<FCard>& CommunityCards) const
-{
-    return FMath::FRand();
-}
-
-bool AAIPlayer::ShouldBluff() const
-{
-    return FMath::FRand() < 0.1f;
 }

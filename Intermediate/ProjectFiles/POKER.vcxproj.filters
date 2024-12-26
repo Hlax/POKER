@@ -47,10 +47,19 @@
     <ClCompile Include="..\..\Source\POKER\Private\AIPlayer.cpp">
       <Filter>Source\POKER\Private</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\Private\BettingManager.cpp">
+      <Filter>Source\POKER\Private</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\POKER\Private\Card.cpp">
       <Filter>Source\POKER\Private</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\POKER\Private\Deck.cpp">
+      <Filter>Source\POKER\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\Private\GameFlowManager.cpp">
+      <Filter>Source\POKER\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\Private\HandEvaluator.cpp">
       <Filter>Source\POKER\Private</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\POKER\Private\MyPlayer.cpp">
@@ -62,16 +71,28 @@
     <ClCompile Include="..\..\Source\POKER\Private\PokerGameState.cpp">
       <Filter>Source\POKER\Private</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\Private\RoundManager.cpp">
+      <Filter>Source\POKER\Private</Filter>
+    </ClCompile>
     <Filter Include="Source\POKER\Public">
       <UniqueIdentifier>{679B0BB3-93FB-3455-8CC8-B33E88531AC8}</UniqueIdentifier>
     </Filter>
     <ClCompile Include="..\..\Source\POKER\Public\AIPlayer.h">
       <Filter>Source\POKER\Public</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\Public\BettingManager.h">
+      <Filter>Source\POKER\Public</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\POKER\Public\Card.h">
       <Filter>Source\POKER\Public</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\POKER\Public\Deck.h">
+      <Filter>Source\POKER\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\Public\GameFlowManager.h">
+      <Filter>Source\POKER\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\Public\HandEvaluator.h">
       <Filter>Source\POKER\Public</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\POKER\Public\IPokerPlayerInterface.h">
@@ -87,6 +108,9 @@
       <Filter>Source\POKER\Public</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\POKER\Public\PokerType.h">
+      <Filter>Source\POKER\Public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\POKER\Public\RoundManager.h">
       <Filter>Source\POKER\Public</Filter>
     </ClCompile>
   </ItemGroup>

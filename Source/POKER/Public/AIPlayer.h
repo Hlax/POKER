@@ -16,8 +16,4 @@ public:
     // Override the RequestAction from parent to implement AI logic
     virtual EPlayerAction RequestAction(int32 MinimumBet, const TArray<FCard>& CommunityCards) override;
     virtual bool IsAIPlayer() const override { return true; }
-
-private:
-    float EvaluateHandStrength(const TArray<FCard>& CommunityCards) const;
-    bool ShouldBluff() const;
 };

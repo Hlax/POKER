@@ -30,4 +30,18 @@ enum class EPlayerAction : uint8;
 template<> struct TIsUEnumClass<EPlayerAction> { enum { Value = true }; };
 template<> POKER_API UEnum* StaticEnum<EPlayerAction>();
 
+#define FOREACH_ENUM_EPOKERGAMEPHASE(op) \
+	op(EPokerGamePhase::None) \
+	op(EPokerGamePhase::Initializing) \
+	op(EPokerGamePhase::PreFlop) \
+	op(EPokerGamePhase::Flop) \
+	op(EPokerGamePhase::Turn) \
+	op(EPokerGamePhase::River) \
+	op(EPokerGamePhase::Showdown) \
+	op(EPokerGamePhase::HandComplete) 
+
+enum class EPokerGamePhase : uint8;
+template<> struct TIsUEnumClass<EPokerGamePhase> { enum { Value = true }; };
+template<> POKER_API UEnum* StaticEnum<EPokerGamePhase>();
+
 PRAGMA_ENABLE_DEPRECATION_WARNINGS

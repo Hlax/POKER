@@ -14,7 +14,7 @@ PRAGMA_DISABLE_DEPRECATION_WARNINGS
 #endif
 #define POKER_PokerGameState_generated_h
 
-#define FID_Users_guestt_OneDrive_Documents_Unreal_Projects_POKER_Source_POKER_Public_PokerGameState_h_29_INCLASS_NO_PURE_DECLS \
+#define FID_Users_guestt_OneDrive_Documents_Unreal_Projects_POKER_Source_POKER_Public_PokerGameState_h_16_INCLASS_NO_PURE_DECLS \
 private: \
 	static void StaticRegisterNativesAPokerGameState(); \
 	friend struct Z_Construct_UClass_APokerGameState_Statics; \
@@ -23,7 +23,7 @@ public: \
 	DECLARE_SERIALIZER(APokerGameState)
 
 
-#define FID_Users_guestt_OneDrive_Documents_Unreal_Projects_POKER_Source_POKER_Public_PokerGameState_h_29_ENHANCED_CONSTRUCTORS \
+#define FID_Users_guestt_OneDrive_Documents_Unreal_Projects_POKER_Source_POKER_Public_PokerGameState_h_16_ENHANCED_CONSTRUCTORS \
 private: \
 	/** Private move- and copy-constructors, should never be used */ \
 	APokerGameState(APokerGameState&&); \
@@ -35,12 +35,12 @@ public: \
 	NO_API virtual ~APokerGameState();
 
 
-#define FID_Users_guestt_OneDrive_Documents_Unreal_Projects_POKER_Source_POKER_Public_PokerGameState_h_26_PROLOG
-#define FID_Users_guestt_OneDrive_Documents_Unreal_Projects_POKER_Source_POKER_Public_PokerGameState_h_29_GENERATED_BODY \
+#define FID_Users_guestt_OneDrive_Documents_Unreal_Projects_POKER_Source_POKER_Public_PokerGameState_h_13_PROLOG
+#define FID_Users_guestt_OneDrive_Documents_Unreal_Projects_POKER_Source_POKER_Public_PokerGameState_h_16_GENERATED_BODY \
 PRAGMA_DISABLE_DEPRECATION_WARNINGS \
 public: \
-	FID_Users_guestt_OneDrive_Documents_Unreal_Projects_POKER_Source_POKER_Public_PokerGameState_h_29_INCLASS_NO_PURE_DECLS \
-	FID_Users_guestt_OneDrive_Documents_Unreal_Projects_POKER_Source_POKER_Public_PokerGameState_h_29_ENHANCED_CONSTRUCTORS \
+	FID_Users_guestt_OneDrive_Documents_Unreal_Projects_POKER_Source_POKER_Public_PokerGameState_h_16_INCLASS_NO_PURE_DECLS \
+	FID_Users_guestt_OneDrive_Documents_Unreal_Projects_POKER_Source_POKER_Public_PokerGameState_h_16_ENHANCED_CONSTRUCTORS \
 private: \
 PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
@@ -50,19 +50,5 @@ template<> POKER_API UClass* StaticClass<class APokerGameState>();
 #undef CURRENT_FILE_ID
 #define CURRENT_FILE_ID FID_Users_guestt_OneDrive_Documents_Unreal_Projects_POKER_Source_POKER_Public_PokerGameState_h
 
-
-#define FOREACH_ENUM_EPOKERGAMEPHASE(op) \
-	op(EPokerGamePhase::None) \
-	op(EPokerGamePhase::Initializing) \
-	op(EPokerGamePhase::PreFlop) \
-	op(EPokerGamePhase::Flop) \
-	op(EPokerGamePhase::Turn) \
-	op(EPokerGamePhase::River) \
-	op(EPokerGamePhase::Showdown) \
-	op(EPokerGamePhase::HandComplete) 
-
-enum class EPokerGamePhase : uint8;
-template<> struct TIsUEnumClass<EPokerGamePhase> { enum { Value = true }; };
-template<> POKER_API UEnum* StaticEnum<EPokerGamePhase>();
 
 PRAGMA_ENABLE_DEPRECATION_WARNINGS

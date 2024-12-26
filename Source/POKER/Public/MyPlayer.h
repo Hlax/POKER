@@ -42,8 +42,14 @@ public:
     virtual void DebugPrintHand() const;
     virtual void DebugPrintAction(EPlayerAction Action, int32 MinimumBet) const;
 
-    // Setter for player name
+    // New methods for game state access
+    const TArray<FCard>& GetHoleCards() const { return HoleCards; }
     void SetPlayerName(const FString& NewName) { PlayerName = NewName; }
+    void SetInitialChips(int32 Amount) { ChipCount = Amount; }
+    void SetSeatIndex(int32 Index) { SeatIndex = Index; }
+
+    // New method to handle forced actions (like folding on timeout)
+    virtual void ForceAction(EPlayerAction Action);
 
 protected:
     virtual void BeginPlay() override;
@@ -63,8 +69,8 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Poker")
     int32 SeatIndex;
 
-    static const int32 MAX_HOLE_CARDS = 2;
-
     UPROPERTY()
     TArray<FCard> HoleCards;
+
+    static const int32 MAX_HOLE_CARDS = 2;
 };

@@ -1,72 +1,160 @@
 // PokerGameState.cpp
-#include "PokerGameState.h"    // Must be first!
+#include "PokerGameState.h"
+#include "MyPlayer.h"
+#include "AIPlayer.h"
 
 APokerGameState::APokerGameState()
 {
     PrimaryActorTick.bCanEverTick = false;
-
-    CurrentPhase = EPokerGamePhase::None;  // Fixed from EPoker to EPokerGamePhase
-    PotSize = 0;
-    CurrentBet = 0;
-    SmallBlindAmount = 10;
+    CurrentPhase = EPokerGamePhase::None;
     DealerPosition = 0;
-    CurrentPlayerTurn = 0;
-    LastRaisePosition = -1;
     bHandInProgress = false;
+
+    RoundManager = CreateDefaultSubobject<URoundManager>(TEXT("RoundManager"));
+    HandEvaluator = CreateDefaultSubobject<UHandEvaluator>(TEXT("HandEvaluator"));
 }
 
 void APokerGameState::BeginPlay()
 {
     Super::BeginPlay();
+    CurrentPhase = EPokerGamePhase::None;
+    bHandInProgress = false;
 }
 
-void APokerGameState::InitializeGame(int32 NumPlayers, int32 StartingChips, int32 SmallBlind)
+void APokerGameState::AddPlayer(TScriptInterface<IPokerPlayerInterface> Player)
 {
-    SmallBlindAmount = SmallBlind;
-    // Note: Player creation should be handled by GameMode, this is just for initialization
-    CurrentPhase = EPokerGamePhase::Initializing;
+    if (Player)
+    {
+        Players.Add(Player);
+        UE_LOG(LogTemp, Log, TEXT("Added player: %s"), *Player->GetPlayerName());
+    }
+}
+
+void APokerGameState::RemovePlayer(TScriptInterface<IPokerPlayerInterface> Player)
+{
+    if (Player)
+    {
+        Players.Remove(Player);
+        UE_LOG(LogTemp, Log, TEXT("Removed player: %s"), *Player->GetPlayerName());
+    }
 }
 
 void APokerGameState::StartNewHand()
 {
-    if (bHandInProgress || Players.Num() < 2)
+    if (Players.Num() < 2 || bHandInProgress)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Cannot start new hand. Players: %d, HandInProgress: %s"),
+            Players.Num(), bHandInProgress ? TEXT("true") : TEXT("false"));
+        return;
+    }
+
+    UE_LOG(LogTemp, Log, TEXT("\n=== Starting New Hand ==="));
+
+    // First prepare all players for the new hand
+    for (auto& Player : Players)
+    {
+        if (Player && Player->GetChipCount() > 0)
+        {
+            Player->PrepareForNewHand();
+            UE_LOG(LogTemp, Log, TEXT("Prepared player %s for new hand (Chips: %d)"),
+                *Player->GetPlayerName(), Player->GetChipCount());
+        }
+        else if (Player)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Player %s cannot join hand - no chips"),
+                *Player->GetPlayerName());
+        }
+    }
+
+    // Initialize hand
+    bHandInProgress = true;
+    CurrentPhase = EPokerGamePhase::PreFlop;
+    CommunityCards.Empty();
+
+    // Reset deck
+    Deck.Reset();
+    Deck.Shuffle();
+
+    UE_LOG(LogTemp, Log, TEXT("Dealer: Seat %d"), DealerPosition);
+
+    // Count active players
+    int32 ActivePlayers = 0;
+    for (const auto& Player : Players)
+    {
+        if (Player && Player->IsInHand())
+        {
+            ActivePlayers++;
+        }
+    }
+
+    UE_LOG(LogTemp, Log, TEXT("Active players in hand: %d"), ActivePlayers);
+
+    // Initialize round manager
+    RoundManager->InitializeRound(Players, DealerPosition, 10); // Small blind = 10
+
+    // Deal cards and start first round
+    DealHoleCards();
+    RoundManager->StartNewRound(CurrentPhase);
+
+    LogGameState();
+}
+
+void APokerGameState::ProcessPlayerAction(int32 PlayerIndex, EPlayerAction Action)
+{
+    if (!bHandInProgress || !RoundManager)
     {
         return;
     }
 
-    // Reset game state
-    PotSize = 0;
-    CurrentBet = 0;
-    LastRaisePosition = -1;
-    bHandInProgress = true;
-    CommunityCards.Empty();
-
-    // Reset deck and shuffle
-    Deck.Reset();
-    Deck.Shuffle();
-
-    // Prepare all players
-    for (auto& Player : Players)
+    if (RoundManager->ProcessAction(PlayerIndex, Action))
     {
-        if (Player)
+        if (RoundManager->IsRoundComplete())
         {
-            Player->PrepareForNewHand();
+            AdvanceToNextPhase();
         }
     }
+}
 
-    // Deal hole cards
-    DealHoleCards();
+void APokerGameState::AdvanceToNextPhase()
+{
+    switch (CurrentPhase)
+    {
+    case EPokerGamePhase::PreFlop:
+        CurrentPhase = EPokerGamePhase::Flop;
+        DealCommunityCards(3);
+        break;
 
-    // Collect blinds
-    CollectBlinds();
+    case EPokerGamePhase::Flop:
+        CurrentPhase = EPokerGamePhase::Turn;
+        DealCommunityCards(1);
+        break;
 
-    CurrentPhase = EPokerGamePhase::PreFlop;
-    CurrentPlayerTurn = (DealerPosition + 3) % Players.Num(); // Start with UTG
+    case EPokerGamePhase::Turn:
+        CurrentPhase = EPokerGamePhase::River;
+        DealCommunityCards(1);
+        break;
+
+    case EPokerGamePhase::River:
+        CurrentPhase = EPokerGamePhase::Showdown;
+        ProcessShowdown();
+        return;
+
+    case EPokerGamePhase::Showdown:
+        EndHand();
+        return;
+
+    default:
+        return;
+    }
+
+    // Start new betting round for next phase
+    RoundManager->StartNewRound(CurrentPhase);
+    LogGameState();
 }
 
 void APokerGameState::DealHoleCards()
 {
-    // Deal 2 cards to each player
+    // Deal 2 cards to each player, starting after dealer
     for (int32 i = 0; i < 2; i++)
     {
         for (int32 j = 0; j < Players.Num(); j++)
@@ -74,219 +162,171 @@ void APokerGameState::DealHoleCards()
             int32 PlayerIndex = (DealerPosition + 1 + j) % Players.Num();
             if (Players[PlayerIndex] && Players[PlayerIndex]->IsInHand())
             {
-                Players[PlayerIndex]->ReceiveCard(Deck.DrawCard());
+                FCard Card = Deck.DrawCard();
+                Players[PlayerIndex]->ReceiveCard(Card);
+                UE_LOG(LogTemp, Log, TEXT("Player %d received: %s"),
+                    PlayerIndex, *Card.ToString());
             }
         }
     }
 }
 
-void APokerGameState::DealCommunityCards()
+void APokerGameState::DealCommunityCards(int32 NumCards)
 {
-    switch (CurrentPhase)
+    UE_LOG(LogTemp, Log, TEXT("\n=== %s ==="), *UEnum::GetValueAsString(CurrentPhase));
+
+    for (int32 i = 0; i < NumCards; i++)
     {
-    case EPokerGamePhase::Flop:
-        // Deal 3 cards
-        for (int32 i = 0; i < 3; i++)
-        {
-            CommunityCards.Add(Deck.DrawCard());
-        }
-        break;
-
-    case EPokerGamePhase::Turn:
-    case EPokerGamePhase::River:
-        // Deal 1 card
-        CommunityCards.Add(Deck.DrawCard());
-        break;
-
-    default:
-        break;
+        FCard Card = Deck.DrawCard();
+        CommunityCards.Add(Card);
     }
+
+    LogCommunityCards();
 }
 
-void APokerGameState::CollectBlinds()
+void APokerGameState::ProcessShowdown()
 {
-    int32 SmallBlindPos = (DealerPosition + 1) % Players.Num();
-    int32 BigBlindPos = (DealerPosition + 2) % Players.Num();
+    UE_LOG(LogTemp, Log, TEXT("\n=== Showdown ==="));
+    LogCommunityCards();
 
-    // Collect small blind
-    if (Players[SmallBlindPos] && Players[SmallBlindPos]->IsInHand())
+    TArray<TPair<int32, FHandRank>> PlayerHands;
+    TArray<int32> ActivePlayerIndices;
+
+    // Collect all active players and evaluate their hands
+    for (int32 i = 0; i < Players.Num(); i++)
     {
-        if (Players[SmallBlindPos]->PlaceBet(SmallBlindAmount))
+        if (Players[i] && Players[i]->IsInHand())
         {
-            PotSize += SmallBlindAmount;
-        }
-    }
-
-    // Collect big blind
-    if (Players[BigBlindPos] && Players[BigBlindPos]->IsInHand())
-    {
-        if (Players[BigBlindPos]->PlaceBet(SmallBlindAmount * 2))
-        {
-            PotSize += SmallBlindAmount * 2;
-        }
-    }
-
-    CurrentBet = SmallBlindAmount * 2;
-}
-
-void APokerGameState::ProcessPlayerAction(int32 PlayerIndex, EPlayerAction Action)
-{
-    if (!bHandInProgress || PlayerIndex != CurrentPlayerTurn)
-    {
-        return;
-    }
-
-    auto Player = Players[PlayerIndex];
-    if (!Player || !Player->IsInHand())
-    {
-        return;
-    }
-
-    // Process the action
-    switch (Action)
-    {
-    case EPlayerAction::Fold:
-        Player->ClearHand();
-        break;
-
-    case EPlayerAction::Call:
-    {
-        int32 AmountToCall = CurrentBet - Player->GetCurrentBet();
-        if (Player->PlaceBet(AmountToCall))
-        {
-            PotSize += AmountToCall;
-        }
-    }
-    break;
-
-    case EPlayerAction::Raise:
-    {
-        // For now, raise is always 2x the current bet
-        int32 RaiseAmount = CurrentBet * 2;
-        int32 AmountToRaise = RaiseAmount - Player->GetCurrentBet();
-        if (Player->PlaceBet(AmountToRaise))
-        {
-            PotSize += AmountToRaise;
-            CurrentBet = RaiseAmount;
-            LastRaisePosition = PlayerIndex;
-        }
-    }
-    break;
-
-    default:
-        break;
-    }
-
-    // Move to next player
-    do
-    {
-        CurrentPlayerTurn = (CurrentPlayerTurn + 1) % Players.Num();
-    } while (!Players[CurrentPlayerTurn] || !Players[CurrentPlayerTurn]->IsInHand());
-
-    // Check if betting round is complete
-    if (IsRoundComplete())
-    {
-        AdvanceGamePhase();
-    }
-}
-
-bool APokerGameState::IsRoundComplete() const
-{
-    // Round is complete when we've reached the last raiser or the big blind in pre-flop
-    if (CurrentPhase == EPokerGamePhase::PreFlop && LastRaisePosition == -1)
-    {
-        return CurrentPlayerTurn == (DealerPosition + 2) % Players.Num();
-    }
-
-    return LastRaisePosition != -1 && CurrentPlayerTurn == LastRaisePosition;
-}
-
-void APokerGameState::AdvanceGamePhase()
-{
-    switch (CurrentPhase)
-    {
-    case EPokerGamePhase::PreFlop:
-        CurrentPhase = EPokerGamePhase::Flop;
-        DealCommunityCards();
-        break;
-
-    case EPokerGamePhase::Flop:
-        CurrentPhase = EPokerGamePhase::None;  // Change from EPoker to EPokerGamePhase
-
-            // PokerGameState.cpp (continued)
-            CurrentPhase = EPokerGamePhase::Turn;
-        DealCommunityCards();
-        break;
-
-    case EPokerGamePhase::Turn:
-        CurrentPhase = EPokerGamePhase::River;
-        DealCommunityCards();
-        break;
-
-    case EPokerGamePhase::River:
-        CurrentPhase = EPokerGamePhase::Showdown;
-        DetermineWinner();
-        break;
-
-    case EPokerGamePhase::Showdown:
-        CurrentPhase = EPokerGamePhase::HandComplete;
-        bHandInProgress = false;
-        RotateDealer();
-        break;
-
-    default:
-        break;
-    }
-
-    if (CurrentPhase != EPokerGamePhase::HandComplete && CurrentPhase != EPokerGamePhase::Showdown)
-    {
-        // Reset betting round state
-        CurrentBet = 0;
-        LastRaisePosition = -1;
-        CurrentPlayerTurn = (DealerPosition + 1) % Players.Num();
-
-        // Reset player bets for the new round
-        for (auto& Player : Players)
-        {
-            if (Player && Player->IsInHand())
+            AMyPlayer* PlayerPtr = Cast<AMyPlayer>(Players[i].GetObject());
+            if (PlayerPtr)
             {
-                // We'll need to add a method to reset current bet without clearing the whole hand
-                // This is a TODO for the Player interface
+                // Get hole cards from player
+                const TArray<FCard>& PlayerCards = PlayerPtr->GetHoleCards();
+                FHandRank HandRank = HandEvaluator->EvaluateHand(PlayerCards, CommunityCards);
+                PlayerHands.Add(TPair<int32, FHandRank>(i, HandRank));
+                ActivePlayerIndices.Add(i);
+
+                // Log player's hand for debugging
+                UE_LOG(LogTemp, Log, TEXT("Player %s hand evaluation:"), *PlayerPtr->GetPlayerName());
+                for (const FCard& Card : PlayerCards)
+                {
+                    UE_LOG(LogTemp, Log, TEXT("  %s"), *Card.ToString());
+                }
             }
         }
     }
+
+    // If no active players, just end the hand
+    if (PlayerHands.Num() == 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("No active players at showdown!"));
+        EndHand();
+        return;
+    }
+
+    // Sort hands by rank (best to worst)
+    PlayerHands.Sort([](const TPair<int32, FHandRank>& A, const TPair<int32, FHandRank>& B) {
+        return B.Value < A.Value;
+        });
+
+    // Find all players with the best hand (to handle splits)
+    TArray<int32> Winners;
+    FHandRank BestHand = PlayerHands[0].Value;
+    for (const auto& PlayerHand : PlayerHands)
+    {
+        if (PlayerHand.Value == BestHand)
+        {
+            Winners.Add(PlayerHand.Key);
+        }
+        else
+        {
+            break;  // No more winners once we find a worse hand
+        }
+    }
+
+    // Distribute pot among winners
+    if (Winners.Num() > 0)
+    {
+        int32 TotalPot = RoundManager->GetMainPot();
+        int32 WinAmount = TotalPot / Winners.Num();  // Split pot evenly among winners
+
+        for (int32 WinnerIndex : Winners)
+        {
+            if (Players[WinnerIndex])
+            {
+                Players[WinnerIndex]->WinPot(WinAmount);
+                UE_LOG(LogTemp, Log, TEXT("Player %s wins %d chips"),
+                    *Players[WinnerIndex]->GetPlayerName(), WinAmount);
+            }
+        }
+    }
+
+    LogHandResults();
+    EndHand();
 }
 
-void APokerGameState::DetermineWinner()
+void APokerGameState::EndCurrentHand()
 {
-    // For now, just pick a random winner among remaining players
-    // TODO: Implement proper hand evaluation
-    TArray<TScriptInterface<IPokerPlayerInterface>> RemainingPlayers;
+    if (bHandInProgress)
+    {
+        CurrentPhase = EPokerGamePhase::HandComplete;
+        EndHand();
+    }
+}
 
+void APokerGameState::EndHand()
+{
+    // Clear all player hands and reset states
     for (auto& Player : Players)
+    {
+        if (Player)
+        {
+            Player->ClearHand();
+        }
+    }
+
+    // Reset game state
+    bHandInProgress = false;
+    CurrentPhase = EPokerGamePhase::None;
+    CommunityCards.Empty();
+
+    // Rotate dealer position
+    DealerPosition = (DealerPosition + 1) % Players.Num();
+
+    UE_LOG(LogTemp, Log, TEXT("=== Hand Complete ==="));
+    UE_LOG(LogTemp, Log, TEXT("Next dealer position: %d"), DealerPosition);
+}
+
+void APokerGameState::LogGameState() const
+{
+    if (CurrentPhase != EPokerGamePhase::PreFlop)
+    {
+        LogCommunityCards();
+    }
+
+    UE_LOG(LogTemp, Log, TEXT("Main Pot: %d"), RoundManager->GetMainPot());
+    UE_LOG(LogTemp, Log, TEXT("Current Actor: Seat %d"), RoundManager->GetCurrentActor());
+}
+
+void APokerGameState::LogCommunityCards() const
+{
+    FString CardStr;
+    for (const FCard& Card : CommunityCards)
+    {
+        CardStr += Card.ToString() + TEXT(" ");
+    }
+    UE_LOG(LogTemp, Log, TEXT("Board: %s"), *CardStr);
+}
+
+void APokerGameState::LogHandResults() const
+{
+    UE_LOG(LogTemp, Log, TEXT("=== Hand Results ==="));
+    for (const auto& Player : Players)
     {
         if (Player && Player->IsInHand())
         {
-            RemainingPlayers.Add(Player);
+            UE_LOG(LogTemp, Log, TEXT("Player %s: Chips %d"),
+                *Player->GetPlayerName(), Player->GetChipCount());
         }
     }
-
-    if (RemainingPlayers.Num() > 0)
-    {
-        int32 WinnerIndex = FMath::RandRange(0, RemainingPlayers.Num() - 1);
-        RemainingPlayers[WinnerIndex]->WinPot(PotSize);
-
-        UE_LOG(LogTemp, Log, TEXT("Player %s wins pot of %d"),
-            *RemainingPlayers[WinnerIndex]->GetPlayerName(),
-            PotSize);
-    }
-}
-
-void APokerGameState::RotateDealer()
-{
-    // Move dealer button to next active player
-    do
-    {
-        DealerPosition = (DealerPosition + 1) % Players.Num();
-    } while (!Players[DealerPosition] || Players[DealerPosition]->GetChipCount() <= 0);
 }

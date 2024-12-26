@@ -73,19 +73,35 @@ bool AMyPlayer::ReceiveCard(const FCard& Card)
     return true;
 }
 
+void AMyPlayer::PrepareForNewHand()
+{
+    // First clear any existing hand
+    ClearHand();
+
+    // Mark as in hand if they have chips
+    if (ChipCount > 0)
+    {
+        bIsInHand = true;
+        CurrentBet = 0;
+        HoleCards.Empty();
+        HoleCards.Reserve(MAX_HOLE_CARDS);
+
+        UE_LOG(LogTemp, Log, TEXT("Player %s prepared for new hand. Chips: %d"),
+            *PlayerName, ChipCount);
+    }
+    else
+    {
+        bIsInHand = false;
+        UE_LOG(LogTemp, Warning, TEXT("Player %s cannot join hand - no chips"), *PlayerName);
+    }
+}
+
 void AMyPlayer::ClearHand()
 {
     HoleCards.Empty();
     bIsInHand = false;
     CurrentBet = 0;
     UE_LOG(LogTemp, Log, TEXT("Player %s's hand cleared"), *PlayerName);
-}
-
-void AMyPlayer::PrepareForNewHand()
-{
-    ClearHand();
-    bIsInHand = true;
-    UE_LOG(LogTemp, Log, TEXT("Player %s prepared for new hand"), *PlayerName);
 }
 
 void AMyPlayer::ResetBetForNewRound()
@@ -173,4 +189,29 @@ void AMyPlayer::DebugPrintAction(EPlayerAction Action, int32 MinimumBet) const
     UE_LOG(LogTemp, Log, TEXT("  Current bet: %d"), CurrentBet);
     UE_LOG(LogTemp, Log, TEXT("  Can make action: %s"),
         CanMakeAction(Action, MinimumBet) ? TEXT("Yes") : TEXT("No"));
+}
+
+void AMyPlayer::ForceAction(EPlayerAction Action)
+{
+    switch (Action)
+    {
+    case EPlayerAction::Fold:
+        bIsInHand = false;
+        ClearHand();
+        UE_LOG(LogTemp, Log, TEXT("Player %s forced to fold"), *PlayerName);
+        break;
+
+    case EPlayerAction::Check:
+        UE_LOG(LogTemp, Log, TEXT("Player %s forced to check"), *PlayerName);
+        break;
+
+    case EPlayerAction::Call:
+        // Handle forced call (this might need additional logic depending on your requirements)
+        UE_LOG(LogTemp, Log, TEXT("Player %s forced to call"), *PlayerName);
+        break;
+
+    default:
+        UE_LOG(LogTemp, Warning, TEXT("Invalid forced action for player %s"), *PlayerName);
+        break;
+    }
 }
